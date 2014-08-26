@@ -108,7 +108,7 @@ void internalSplit(DelimT delim, StringPiece sp, OutputIterator out,
 
     int tokenStartPos = 0;
     int tokenSize = 0;
-    for (int i = 0; i <= strSize - dSize; ++i) 
+    for (size_t i = 0; i <= strSize - dSize; ++i)
     {
         if (atDelim(&s[i], delim)) 
         {
