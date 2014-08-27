@@ -1,7 +1,6 @@
 #include "json.h"
 #include "Strings.h"
 #include <boost/next_prior.hpp>
-#include <boost/algorithm/string.hpp>
 
 
 std::string codePointToUtf8(char32_t cp) 
@@ -396,7 +395,7 @@ struct Input
 
     bool consume(StringPiece str) 
     {
-        if (boost::starts_with(range_, str)) 
+        if (range_.startsWith(str)) 
         {
             range_.advance(str.size());
             storeCurrent();
