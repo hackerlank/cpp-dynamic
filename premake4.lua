@@ -39,6 +39,10 @@ solution 'cpp-json'
             '__STDC_LIMIT_MACROS',
             '_ELPP_STACKTRACE_ON_CRASH',
         }
+        links
+        {
+            'pthread',
+        }
 
     project 'unittest'
         location 'build'
