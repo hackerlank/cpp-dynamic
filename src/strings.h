@@ -16,12 +16,12 @@
  
 #pragma once
 
-#include "Platform.h"
 #include <string>
 #include <vector>
 #include <type_traits>
-#include "Range.h"
-#include "Conv.h"
+#include "platform.h"
+#include "range.h"
+#include "conv.h"
 
 
 /**
@@ -30,17 +30,17 @@
  * resulting string, and the second appends the produced characters to
  * the specified string and returns a reference to it.
  */
-std::string stringPrintf(FOLLY_PRINTF_FORMAT const char* format, ...)
-    FOLLY_PRINTF_FORMAT_ATTR(1, 2);
+std::string stringPrintf(PRINTF_FORMAT const char* format, ...)
+    PRINTF_FORMAT_ATTR(1, 2);
 
 /** Similar to stringPrintf, with different signiture.
  */
-void stringPrintf(std::string* out, FOLLY_PRINTF_FORMAT const char* fmt, ...)
-    FOLLY_PRINTF_FORMAT_ATTR(2, 3);
+void stringPrintf(std::string* out, PRINTF_FORMAT const char* fmt, ...)
+    PRINTF_FORMAT_ATTR(2, 3);
 
 std::string& stringAppendf(std::string* output, 
-        FOLLY_PRINTF_FORMAT const char* format, ...)
-    FOLLY_PRINTF_FORMAT_ATTR(2, 3);
+    PRINTF_FORMAT const char* format, ...)
+    PRINTF_FORMAT_ATTR(2, 3);
 
 
 /*
@@ -244,4 +244,4 @@ double prettyToDouble(StringPiece *const prettyString,
  */
 double prettyToDouble(StringPiece prettyString, const PrettyType type);
 
-#include "Strings-inl.h"
+#include "strings-inl.h"

@@ -1,4 +1,6 @@
-// Copyright (C) 2014 ichenq@gmail.com
+// Copyright (C) 2014 ichenq@gmail.com. All rights reserved.
+// Distributed under the terms and conditions of the Apache License.
+// See accompanying files LICENSE.
 
 #pragma once
 
@@ -14,11 +16,21 @@
 
 // 64 bit detection
 #if defined(__x86_64__) || defined(_M_X64)
-# define FOLLY_X64  1
+# define PLAT_X64  1
 #else
-# define FOLLY_X64  0
+# define PLAT_X64  0
 #endif
 
+// macro wrappers for C++11's "final" and "override" keywords
+#if !defined(QSF_FINAL) && !defined(QSF_OVERRIDE)
+# if defined(__clang__) || __GNUC_PREREQ(4, 7)
+#  define FINAL     final
+#  define OVERRIDE  override
+# else
+#  define FINAL
+#  define OVERRIDE
+# endif
+#endif
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define LIKELY(x)   (__builtin_expect((x), 1))
@@ -29,11 +41,11 @@
 #endif
 
 #ifdef _MSC_VER
-# define ALIGN(x)        __declspec(align(x))
+# define ATTR_ALIGN(x)        __declspec(align(x))
 #include <cstddef>
 typedef std::max_align_t MaxAlign;
 #elif defined(__GNUC__)
-# define ALIGN(x)        __attribute__((aligned(x)))
+# define ATTR_ALIGN(x)        __attribute__((aligned(x)))
 struct MaxAlign { char c; } __attribute__((aligned));
 #endif
 
@@ -47,11 +59,11 @@ struct MaxAlign { char c; } __attribute__((aligned));
 # endif
 # define _USE_ATTRIBUTES_FOR_SAL 1
 # include <sal.h>
-# define FOLLY_PRINTF_FORMAT _Printf_format_string_
-# define FOLLY_PRINTF_FORMAT_ATTR(format_param, dots_param) /**/
+# define PRINTF_FORMAT _Printf_format_string_
+# define PRINTF_FORMAT_ATTR(format_param, dots_param) /**/
 #else
-# define FOLLY_PRINTF_FORMAT /**/
-# define FOLLY_PRINTF_FORMAT_ATTR(format_param, dots_param) \
+# define PRINTF_FORMAT /**/
+# define PRINTF_FORMAT_ATTR(format_param, dots_param) \
   __attribute__((format(printf, format_param, dots_param)))
 #endif
 
@@ -61,9 +73,9 @@ struct MaxAlign { char c; } __attribute__((aligned));
  * the semantics are the same (but remember __thread is broken on apple)
  */
 #if defined(_MSC_VER)
-# define FOLLY_TLS __declspec(thread)
+# define THREAD_LOCAL __declspec(thread)
 #elif defined(__GNUC__) || defined(__clang__)
-# define FOLLY_TLS __thread
+# define THREAD_LOCAL __thread
 #else
 # error cannot define platform specific thread local storage
 #endif

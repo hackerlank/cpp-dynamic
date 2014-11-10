@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "Platform.h"
 #include <cassert>
 #include <cstring>
 #include <iosfwd>
@@ -27,8 +26,8 @@
 #include <string>
 #include <type_traits>
 #include <algorithm>
-#include <boost/operators.hpp>
-#include "Logging.h"
+#include "platform.h"
+#include "logging.h"
 
 template <class T> class Range;
 
@@ -115,7 +114,7 @@ value_before(Iter i)
  * wouldn't.)
  */
 template <class Iter>
-class Range : private boost::totally_ordered < Range<Iter> >
+class Range
 {
 public:
     typedef std::size_t size_type;
@@ -371,13 +370,13 @@ public:
 
     value_type& operator[](size_t i)
     {
-        DCHECK_GT(size(), i);
+        DCHECK_GT(size(), i) << size() << "," << i;
         return b_[i];
     }
 
     const value_type& operator[](size_t i) const
     {
-        DCHECK_GT(size(), i);
+        DCHECK_GT(size(), i) << size() << "," << i;;
         return b_[i];
     }
 
@@ -865,9 +864,33 @@ inline bool operator==(const Range<T>& lhs, const Range<T>& rhs)
 }
 
 template <class T>
+inline bool operator!=(const Range<T>& lhs, const Range<T>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class T>
 inline bool operator<(const Range<T>& lhs, const Range<T>& rhs)
 {
     return lhs.compare(rhs) < 0;
+}
+
+template <class T>
+inline bool operator>(const Range<T>& lhs, const Range<T>& rhs)
+{
+    return lhs.compare(rhs) > 0;
+}
+
+template <class T>
+inline bool operator>=(const Range<T>& lhs, const Range<T>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+template <class T>
+inline bool operator<=(const Range<T>& lhs, const Range<T>& rhs)
+{
+    return !(lhs > rhs);
 }
 
 /**
@@ -901,6 +924,14 @@ std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator==(const T& lhs, const U& rhs)
 {
     return StringPiece(lhs) == StringPiece(rhs);
+}
+
+template <class T, class U>
+typename
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+operator!=(const T& lhs, const U& rhs)
+{
+    return StringPiece(lhs) != StringPiece(rhs);
 }
 
 /**

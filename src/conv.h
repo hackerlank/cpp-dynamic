@@ -21,24 +21,43 @@
  * @author Andrei Alexandrescu (andrei.alexandrescu@fb.com)
  */
 
+// Remove dependency of double conversion.
+// @author ichenq@gmail.com.
+
 #pragma once
 
-#include "Platform.h"
 #include <cstdint>
 #include <cassert>
 #include <string>
 #include <stdexcept>
 #include <type_traits>
-#include <boost/implicit_cast.hpp>
-#include <double-conversion.h> // V8 JavaScript implementation
-#include "Logging.h"
-#include "Range.h"
+#include "platform.h"
+#include "logging.h"
+#include "range.h"
+#include "dtoa.h"
 
 #define FOLLY_RANGE_CHECK(condition, message)                           \
   ((condition) ? (void)0 : throw std::range_error(                      \
     (__FILE__ "(" + std::to_string((long long int) __LINE__) + "): "    \
      + (message)).c_str()))
 
+namespace detail {
+
+// Use implicit_cast as a safe version of static_cast or const_cast
+// for upcasting in the type hierarchy (i.e. casting a pointer to Foo
+// to a pointer to SuperclassOfFoo or casting a pointer to Foo to
+// a const pointer to Foo).
+// When you use implicit_cast, the compiler checks that the cast is safe.
+// Such explicit implicit_casts are necessary in surprisingly many
+// situations where C++ demands an exact type match instead of an
+// argument type convertable to a target type.
+template<typename T> struct identity { typedef T type; };
+template<typename T> T implicit_cast(typename identity<T>::type t)
+{
+    return t;
+}
+
+} // namespace detail
 
 /*******************************************************************************
  * Integral to integral
@@ -79,7 +98,7 @@ template <class Tgt, class Src>
 typename std::enable_if<
     std::is_floating_point<Tgt>::value
     && std::is_floating_point<Src>::value, Tgt>::type
-to(const Src & value)
+to(const Src& value)
 {
     if (std::numeric_limits<Tgt>::max() < std::numeric_limits<Src>::max())
     {
@@ -88,7 +107,7 @@ to(const Src & value)
         FOLLY_RANGE_CHECK(value >= -std::numeric_limits<Tgt>::max(),
             "Negative overflow");
     }
-    return boost::implicit_cast<Tgt>(value);
+    return detail::implicit_cast<Tgt>(value);
 }
 
 /**
@@ -150,8 +169,8 @@ inline uint32_t uint64ToBufferUnsafe(uint64_t v, char *const buffer)
 }
 
 /**
-* Ubiquitous helper template for writing string appenders
-*/
+ * Ubiquitous helper template for writing string appenders
+ */
 template <class T> struct IsSomeString
 {
     enum
@@ -271,46 +290,6 @@ toAppend(std::string* result, Src value)
  * Conversions from floating-point types to string types.
  ******************************************************************************/
 
-/** Wrapper around DoubleToStringConverter **/
-template <class Tgt, class Src>
-typename std::enable_if<
-    std::is_floating_point<Src>::value
-    && IsSomeString<Tgt>::value>::type
-toAppend(
-  Src value,
-  Tgt * result,
-  double_conversion::DoubleToStringConverter::DtoaMode mode,
-  unsigned int numDigits)
-{
-    using namespace double_conversion;
-    DoubleToStringConverter
-        conv(DoubleToStringConverter::NO_FLAGS,
-        "infinity", "NaN", 'E',
-        -6,  // decimal in shortest low
-        21,  // decimal in shortest high
-        6,   // max leading padding zeros
-        1);  // max trailing padding zeros
-    char buffer[256];
-    StringBuilder builder(buffer, sizeof(buffer));
-    switch (mode)
-    {
-    case DoubleToStringConverter::SHORTEST:
-        conv.ToShortest(value, &builder);
-        break;
-    case DoubleToStringConverter::FIXED:
-        conv.ToFixed(value, numDigits, &builder);
-        break;
-    default:
-        CHECK(mode == DoubleToStringConverter::PRECISION);
-        conv.ToPrecision(value, numDigits, &builder);
-        break;
-    }
-    const size_t length = builder.position();
-    builder.Finalize();
-    result->append(buffer, length);
-}
-
-
 /**
  * For floating point
  */
@@ -319,8 +298,10 @@ typename std::enable_if<
     std::is_floating_point<Src>::value>::type
 toAppend(std::string* result, Src value)
 {
-    toAppend(
-        value, result, double_conversion::DoubleToStringConverter::SHORTEST, 0);
+    char buffer[32];
+    const char* end = rapidjson::internal::dtoa(value, buffer);
+    DCHECK(end < buffer+sizeof(buffer));
+    toAppend(result, StringPiece(buffer, end));
 }
 
 /**
@@ -486,7 +467,7 @@ template <class T> struct MaxString
 // still not overflow uint16_t.
 const int32_t OOR = 10000;
 
-ALIGN(16) const uint16_t shift1[] =
+ATTR_ALIGN(16) const uint16_t shift1[] =
 {
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  // 0-9
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  //  10
@@ -516,7 +497,7 @@ ALIGN(16) const uint16_t shift1[] =
     OOR, OOR, OOR, OOR, OOR, OOR                       // 250
 };
 
-ALIGN(16) const uint16_t shift10[] =
+ATTR_ALIGN(16) const uint16_t shift10[] =
 {
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  // 0-9
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  //  10
@@ -546,7 +527,7 @@ ALIGN(16) const uint16_t shift10[] =
     OOR, OOR, OOR, OOR, OOR, OOR                       // 250
 };
 
-ALIGN(16) const uint16_t shift100[] =
+ATTR_ALIGN(16) const uint16_t shift100[] =
 {
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  // 0-9
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  //  10
@@ -576,7 +557,7 @@ ALIGN(16) const uint16_t shift100[] =
     OOR, OOR, OOR, OOR, OOR, OOR                       // 250
 };
 
-ALIGN(16) const uint16_t shift1000[] =
+ATTR_ALIGN(16) const uint16_t shift1000[] =
 {
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  // 0-9
     OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR, OOR,  //  10
@@ -704,9 +685,9 @@ inline void enforceWhitespace(const char* b, const char* e) {
 } // namespace detail
 
 /**
-* String represented as a pair of pointers to char to unsigned
-* integrals. Assumes NO whitespace before or after.
-*/
+ * String represented as a pair of pointers to char to unsigned
+ * integrals. Assumes NO whitespace before or after.
+ */
 template <class Tgt>
 typename std::enable_if<
     std::is_integral<Tgt>::value
@@ -757,9 +738,9 @@ to(const char* b, const char* e)
 
 
 /**
-* StringPiece to integrals, with progress information. Alters the
-* StringPiece parameter to munch the already-parsed characters.
-*/
+ * StringPiece to integrals, with progress information. Alters the
+ * StringPiece parameter to munch the already-parsed characters.
+ */
 template <class Tgt>
 typename std::enable_if<
     std::is_integral<Tgt>::value
@@ -857,46 +838,22 @@ to(StringPiece src)
  ******************************************************************************/
 
 /**
- * StringPiece to double, with progress information. Alters the
- * StringPiece parameter to munch the already-parsed characters.
+ * Any string, const char*, or StringPiece to double.
  */
 template <class Tgt>
-inline typename std::enable_if<
+typename std::enable_if<
     std::is_floating_point<Tgt>::value,
     Tgt>::type
-to(StringPiece *const src)
+to(StringPiece* src)
 {
-    using namespace double_conversion;
-    static StringToDoubleConverter
-        conv(StringToDoubleConverter::ALLOW_TRAILING_JUNK
-        | StringToDoubleConverter::ALLOW_LEADING_SPACES,
-        0.0,
-        // return this for junk input string
-        std::numeric_limits<double>::quiet_NaN(),
-        nullptr, nullptr);
-
     FOLLY_RANGE_CHECK(!src->empty(), "No digits found in input string");
 
-    int length;
-    auto result = conv.StringToDouble(src->data(), static_cast<int>(src->size()),
-        &length); // processed char count
-
-    if (!std::isnan(result))
+    char* end;
+    double result = strtod(src->data(), &end);
+    if (end > src->data())
     {
-        src->advance(length);
-        return result;
-    }
-
-    for (;; src->advance(1))
-    {
-        if (src->empty())
-        {
-            throw std::range_error("Unable to convert an empty string"
-                " to a floating point value.");
-        }
-        if (!isspace(src->front())) {
-            break;
-        }
+        src->advance(end - src->data());
+        return to<Tgt>(result);
     }
 
     // Was that "inf[inity]"?
@@ -964,7 +921,6 @@ to(StringPiece *const src)
         + "\" to a floating point value.");
 }
 
-
 /**
  * Any string, const char*, or StringPiece to double.
  */
@@ -974,7 +930,7 @@ typename std::enable_if<
     Tgt>::type
 to(StringPiece src)
 {
-    Tgt result = to<double>(&src);
+    auto result = to<Tgt>(&src);
     detail::enforceWhitespace(src.data(), src.data() + src.size());
     return result;
 }
