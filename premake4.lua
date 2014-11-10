@@ -18,6 +18,28 @@ solution 'cpp-json'
         defines { 'NDEBUG' }
         flags { 'Symbols', 'Optimize' }
 
+    configuration 'vs*'
+        defines
+        {
+            'WIN32',
+            'WIN32_LEAN_AND_MEAN',
+            '_WIN32_WINNT=0x0600',
+            '_CRT_SECURE_NO_WARNINGS',
+            '_SCL_SECURE_NO_WARNINGS',
+            'NOMINMAX',
+        }
+        includedirs { BOOST_ROOT }
+        libdirs { BOOST_ROOT .. '/stage/lib' }
+        links 'ws2_32'        
+
+    configuration 'gmake'
+        buildoptions '-std=c++11'
+        defines
+        {
+            '__STDC_LIMIT_MACROS',
+            '_ELPP_STACKTRACE_ON_CRASH',
+        }
+
     project 'unittest'
         location 'build'
         kind 'ConsoleApp'
@@ -37,29 +59,11 @@ solution 'cpp-json'
             'src',
             'dep/gtest',
             'dep/gtest/include',
-            'dep/double-conversion',
-            BOOST_ROOT,
         }
         links
         {
             'cpp-json',
-            'double-conversion',
         }
-        if os.get() == 'windows' then
-        defines 
-        {
-            'WIN32',
-            'WIN32_LEAN_AND_MEAN',
-            '_WIN32_WINNT=0x0600',
-            '_CRT_SECURE_NO_WARNINGS',
-            '_SCL_SECURE_NO_WARNINGS',
-            'NOMINMAX',
-        }
-        libdirs
-        {
-            BOOST_ROOT .. '/stage/lib',
-        }
-        end
         
     project 'cpp-json'
         location 'build'
@@ -73,34 +77,4 @@ solution 'cpp-json'
         includedirs
         {
             'src',
-            'dep/double-conversion',
-            BOOST_ROOT,
-        }        
-        if os.get() == 'windows' then
-        defines 
-        {
-            'WIN32',
-            'WIN32_LEAN_AND_MEAN',
-            '_WIN32_WINNT=0x0600',
-            '_CRT_SECURE_NO_WARNINGS',
-            '_SCL_SECURE_NO_WARNINGS',
-            'NOMINMAX',
         }
-        end
-        
-    project 'double-conversion'
-        location 'build'
-        kind 'StaticLib'
-        uuid '8701594A-72B8-4a6a-AEF3-6B41BBC33E65'
-        files
-        {
-            'dep/double-conversion/*.cc',
-            'dep/double-conversion/*.h',
-        }
-        includedirs
-        {
-            'dep/double-conversion',
-        }
-
-    
-        
