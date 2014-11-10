@@ -1,8 +1,7 @@
+#include <gtest/gtest.h>
 #include <cinttypes>
 #include <vector>
-#include <gtest/gtest.h>
-#include "Strings.h"
-
+#include "strings.h"
 
 using namespace std;
 

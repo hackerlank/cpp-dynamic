@@ -25,8 +25,7 @@
 #include <vector>
 #include <random>
 #include <gtest/gtest.h>
-#include <boost/range/concepts.hpp>
-#include "Range.h"
+#include "range.h"
 
 
 using namespace std;
@@ -45,7 +44,7 @@ size_t qfind_first_byte_of_byteset(const StringPiece& haystack,
 
 using namespace std;
 
-BOOST_CONCEPT_ASSERT((boost::RandomAccessRangeConcept<StringPiece>));
+
 
 TEST(StringPiece, All)
 {
@@ -366,36 +365,36 @@ TEST(StringPiece, Suffix)
         EXPECT_TRUE(b.removeSuffix(""));
         EXPECT_EQ("hello", b);
     }
-  {
-      auto b = a;
-      EXPECT_TRUE(b.removeSuffix("o"));
-      EXPECT_EQ("hell", b);
-  }
-  {
-      auto b = a;
-      EXPECT_TRUE(b.removeSuffix('o'));
-      EXPECT_EQ("hell", b);
-  }
-  {
-      auto b = a;
-      EXPECT_TRUE(b.removeSuffix("hello"));
-      EXPECT_EQ("", b);
-  }
-  {
-      auto b = a;
-      EXPECT_FALSE(b.removeSuffix("xhello"));
-      EXPECT_EQ("hello", b);
-  }
-  {
-      auto b = a;
-      EXPECT_FALSE(b.removeSuffix("x"));
-      EXPECT_EQ("hello", b);
-  }
-  {
-      auto b = a;
-      EXPECT_FALSE(b.removeSuffix('x'));
-      EXPECT_EQ("hello", b);
-  }
+    {
+        auto b = a;
+        EXPECT_TRUE(b.removeSuffix("o"));
+        EXPECT_EQ("hell", b);
+    }
+    {
+        auto b = a;
+        EXPECT_TRUE(b.removeSuffix('o'));
+        EXPECT_EQ("hell", b);
+    }
+    {
+        auto b = a;
+        EXPECT_TRUE(b.removeSuffix("hello"));
+        EXPECT_EQ("", b);
+    }
+    {
+        auto b = a;
+        EXPECT_FALSE(b.removeSuffix("xhello"));
+        EXPECT_EQ("hello", b);
+    }
+    {
+        auto b = a;
+        EXPECT_FALSE(b.removeSuffix("x"));
+        EXPECT_EQ("hello", b);
+    }
+    {
+        auto b = a;
+        EXPECT_FALSE(b.removeSuffix('x'));
+        EXPECT_EQ("hello", b);
+    }
 }
 
 TEST(StringPiece, PrefixEmpty)
@@ -1186,4 +1185,3 @@ TEST(ReplaceAll, BadArg)
 
     EXPECT_EQ(count, 2);
 }
-
