@@ -1,5 +1,5 @@
 #include "json.h"
-#include "Strings.h"
+#include "strings.h"
 #include <boost/next_prior.hpp>
 
 
@@ -145,7 +145,7 @@ struct Printer
                 throw std::runtime_error("folly::toJson: JSON object value was a "
                     "NaN or INF");
             }
-            toAppend(v.asDouble(), &out_, opts_.double_mode, opts_.double_num_digits);
+            toAppend(&out_, v.asDouble());
             break;
         case dynamic::INT64: 
         {
