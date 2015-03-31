@@ -26,15 +26,17 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cassert>
+#include <stdint.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <float.h>
 #include <string>
 #include <stdexcept>
 #include <type_traits>
 #include "platform.h"
 #include "logging.h"
 #include "range.h"
-#include "dtoa.h"
+
 
 #define FOLLY_RANGE_CHECK(condition, message)                           \
   ((condition) ? (void)0 : throw std::range_error(                      \
@@ -299,9 +301,16 @@ typename std::enable_if<
 toAppend(std::string* result, Src value)
 {
     char buffer[32];
-    const char* end = rapidjson::internal::dtoa(value, buffer);
-    DCHECK(end < buffer+sizeof(buffer));
-    toAppend(result, StringPiece(buffer, end));
+    int count = snprintf(buffer, 32, "%.*f", FLT_DIG, value);
+    DCHECK(count > 0);
+    for (int i = count - 1; i > 1; i--)
+    {
+        if (buffer[i] == '0' && buffer[i - 1] != '.')
+            count--;
+        else
+            break;
+    }
+    toAppend(result, StringPiece(buffer, count));
 }
 
 /**
