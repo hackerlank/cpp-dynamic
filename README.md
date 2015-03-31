@@ -7,7 +7,23 @@ Runtime dynamic json type for C++.
 ## Introduction
 
 This component was taken from [folly](https://github.com/facebook/folly/blob/master/folly/dynamic.h), 
-with efforts porting to Visual C++.
+with efforts porting to Visual C++ 2013.
+
+
+## Build
+
+Obtain [premake4](http://industriousone.com/premake/download).
+
+Type `premake4 vs2013` on Windows or `premake4 gmake` on Linux
+
+## Build
+
+To build the library and test suits(on Windows)
+
+1. Obtain boost library(http://boost.org) 
+2. Set environment variable `BOOST_ROOT` as directory path of boost library
+3. Obtain [premake4](http://industriousone.com/premake/download).
+4. Type `premake4 vs2013` on Windows or `premake4 gmake` on Linux
 
 
 ## Usage
@@ -52,13 +68,3 @@ dynamic sonOfAJ = dynamic::object
 auto str = toJson(sonOfAJ);
 assert(jsonDocument.compare(str) == 0);    
 ```
-
-## Build
-
-To build the library and test suits(on Windows)
-
-1. Obtain boost library(http://boost.org) 
-2. Set environment variable `BOOST_ROOT` as directory path of boost library
-3. Run `build-msvc2013.bat` to generate Visual C++ 2013 solution files
-4. Build the solution files with Visual Studio 2013(or Visual Studio 2013 express)
-
