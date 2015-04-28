@@ -12,18 +12,14 @@ with efforts porting to Visual C++ 2013.
 
 ## Build
 
-Obtain [premake4](http://industriousone.com/premake/download).
+Obtain [premake5](http://premake.github.io/download.html).
 
-Type `premake4 vs2013` on Windows or `premake4 gmake` on Linux
-
-## Build
 
 To build the library and test suits(on Windows)
 
 1. Obtain boost library(http://boost.org) 
 2. Set environment variable `BOOST_ROOT` as directory path of boost library
-3. Obtain [premake4](http://industriousone.com/premake/download).
-4. Type `premake4 vs2013` on Windows or `premake4 gmake` on Linux
+3. Type `premake5 vs2013` on Windows or `premake5 gmake && make config=release_x64` on Linux
 
 
 ## Usage

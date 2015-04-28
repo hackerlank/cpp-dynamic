@@ -1,5 +1,5 @@
 --
--- Premake4 build script (http://industriousone.com/premake/download)
+-- Premake script (http://premake.github.io)
 --
 
 local BOOST_ROOT = os.getenv('BOOST_ROOT') or ''
