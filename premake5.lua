@@ -5,20 +5,19 @@
 local BOOST_ROOT = os.getenv('BOOST_ROOT') or ''
 
 solution 'cpp-json'
-    configurations {'Debug', 'Release'}
-    language 'C++'
-    targetdir 'bin'
-    platforms {'x32','x64'}
+    configurations  {'Debug', 'Release'}
+    language        'C++'
+    targetdir       'bin'
 
-    configuration 'Debug'
-        defines { 'DEBUG' }
-        flags { 'Symbols' }
+    filter 'configurations:Debug'
+        defines     { 'DEBUG' }
+        flags       { 'Symbols' }
 
-    configuration 'Release'
-        defines { 'NDEBUG' }
-        flags { 'Symbols', 'Optimize' }
+    filter 'configurations:Release'
+        defines     { 'NDEBUG' }
+        flags       { 'Symbols', 'Optimize' }
 
-    configuration 'vs*'
+    filter 'action:vs*'
         defines
         {
             'WIN32',
@@ -29,29 +28,22 @@ solution 'cpp-json'
             'NOMINMAX',
         }
         includedirs { BOOST_ROOT }
-        libdirs { BOOST_ROOT .. '/stage/lib' }
-        links 'ws2_32'        
+        libdirs     { BOOST_ROOT .. '/stage/lib' }
+        links       'ws2_32'        
 
-    configuration 'gmake'
-        buildoptions '-std=c++11'
+    filter 'action:gmake'
+        buildoptions    '-std=c++11'
+        links           'pthread'
         defines
         {
             '__STDC_LIMIT_MACROS',
             '_ELPP_STACKTRACE_ON_CRASH',
         }
-        links
-        {
-            'pthread',
-        }
 
     project 'unittest'
-        location 'build'
-        kind 'ConsoleApp'
-        uuid '31BC2F58-F374-4984-B490-F1F08ED02DD3'
-        defines
-        {
-            'GTEST_HAS_TR1_TUPLE',
-        }
+        location    'build'
+        kind        'ConsoleApp'
+        defines     'GTEST_HAS_TR1_TUPLE'
         files
         {
             'dep/gtest/src/gtest-all.cc',
@@ -64,21 +56,14 @@ solution 'cpp-json'
             'dep/gtest',
             'dep/gtest/include',
         }
-        links
-        {
-            'cpp-json',
-        }
+        links 'cpp-json'
         
     project 'cpp-json'
-        location 'build'
-        kind 'StaticLib'
-        uuid '23431524-7099-4E72-8D4F-DC4A21F720A8'
+        location    'build'
+        kind        'StaticLib'
+        includedirs 'src'
         files
         {
             'src/*.h',
             'src/*.cpp',
-        }
-        includedirs
-        {
-            'src',
         }
