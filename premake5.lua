@@ -2,7 +2,9 @@
 -- Premake script (http://premake.github.io)
 --
 
-local BOOST_ROOT = os.getenv('BOOST_ROOT') or ''
+-- https://github.com/ichenq/usr
+local USR_ROOT = os.getenv('USR_ROOT') or 'E:/Library/usr'
+local BOOST_ROOT = os.getenv('BOOST_ROOT') or 'E:/Library/boost_1_58_0'
 
 solution 'cpp-json'
     configurations  {'Debug', 'Release'}
@@ -27,8 +29,16 @@ solution 'cpp-json'
             '_SCL_SECURE_NO_WARNINGS',
             'NOMINMAX',
         }
-        includedirs { BOOST_ROOT }
-        libdirs     { BOOST_ROOT .. '/stage/lib' }
+        includedirs 
+        { 
+            BOOST_ROOT,
+            USR_ROOT .. '/include'
+        }
+        libdirs
+        { 
+            BOOST_ROOT .. '/stage/lib',
+            USR_ROOT .. '/lib/x86',
+        }
         links       'ws2_32'        
 
     filter 'action:gmake'
@@ -43,20 +53,20 @@ solution 'cpp-json'
     project 'unittest'
         location    'build'
         kind        'ConsoleApp'
-        defines     'GTEST_HAS_TR1_TUPLE'
         files
         {
-            'dep/gtest/src/gtest-all.cc',
             'test/*.h',
             'test/*.cpp',
         }
         includedirs
         {
             'src',
-            'dep/gtest',
-            'dep/gtest/include',
         }
-        links 'cpp-json'
+        links 
+        {   
+            'cpp-json',
+            'gtest',
+        }
         
     project 'cpp-json'
         location    'build'
