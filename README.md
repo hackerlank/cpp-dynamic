@@ -1,4 +1,4 @@
-# cpp-json
+# cpp-dynamic
 
 
 Runtime dynamic json type for C++.
@@ -19,7 +19,8 @@ To build the library and test suits(on Windows)
 
 1. Obtain boost library(http://boost.org) 
 2. Set environment variable `BOOST_ROOT` as directory path of boost library
-3. Type `premake5 vs2013` on Windows or `premake5 gmake && make config=release_x64` on Linux
+3. Install gtest or clone https://github.com/ichenq/usr in Windows
+4. Type `premake5 vs2013` on Windows or `premake5 gmake && make config=release_x64` on Linux
 
 
 ## Usage
